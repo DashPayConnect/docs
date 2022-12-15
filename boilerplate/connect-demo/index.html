@@ -1,0 +1,145 @@
+<html>
+<head>
+    <script src="./dashpay-connect.min.js"></script>
+    <script>
+        window.addEventListener("message", function (event) {
+            if (event.data.type && (event.data.type == "FROM_CONTENT")) {
+                console.log("Page script received: " + event.data.text)
+            }
+        }, false)
+    </script>
+</head>
+<body>
+<style>
+    body {
+        margin: 0;
+    }
+
+    .site-header {
+        margin: 0;
+        /**
+         * Lay out the children of this container with
+         * flexbox, which is horizontal by default.
+         */
+        display: flex;
+
+        /**
+         * Make the container put as much space as possible
+         * between its children, with the children at either
+         * end laying flush against the container's edges.
+         */
+        justify-content: space-between;
+
+        padding: 10px;
+        background-color: #026dad;
+    }
+
+    .site-header__section {
+        /**
+         * Lay out the children of this container with
+         * flexbox.
+         */
+        display: flex;
+
+        /**
+         * Align the children in the center, along
+         * the main axis. By default the children will
+         * align along their top edges.
+         */
+        align-items: center;
+    }
+
+    .site-header__item {
+        padding: 5px 15px;
+        font-size: 12px;
+    }
+
+    .site-header__item + .site-header__item {
+        margin-left: 5px;
+    }
+
+    .site-header__item.is-site-header-item-selected {
+        color: #FFFFFF;
+        background-color: #415F69;
+        border-radius: 4px;
+    }
+
+    .site-headerLogo {
+        font-size: 20px;
+        line-height: 0;
+        color: white;
+    }
+
+    .site-headerButton {
+        cursor: pointer;
+        color: #D9E9EF;
+    }
+
+    .side-header__item-hidden {
+        display: none;
+    }
+</style>
+
+<header class="site-header">
+    <!-- This section gets pushed to the left side-->
+    <div class="site-header__section">
+        <!--                <div class="site-header__item site-headerLogo">-->
+        <!--                        <div class="fa fa-inbox"></div>-->
+        <!--                </div>-->
+        <!--                <div class="site-header__item site-headerButton is-site-header-item-selected">Inbox</div>-->
+        <!--                <div class="site-header__item site-headerButton">Sent</div>-->
+        <!--                <div class="site-header__item site-headerButton">Trash</div>-->
+    </div>
+    <!-- This section gets pushed to the right side-->
+    <div class="site-header__section">
+        <!--                <div class="site-header__item site-headerButton">Settings</div>-->
+        <span class="site-header__item side-header__item-hidden" id="site-header__address"></span>
+        <div class="site-header__item site-headerButton" id="site-header__item-connect-wallet-button">Connect Wallet
+        </div>
+        <div class="site-header__item site-headerButton side-header__item-hidden"
+             id="site-header__item-disconnect-wallet-button">Disconnect Wallet
+        </div>
+    </div>
+</header>
+<div id="side-content">
+    <p>Status: <span id="wallet-status_value">Disconnected</span></p>
+    <p>Wallet ID: <span id="wallet-id_value"></span></p>
+    <p>Wallet Type: <span id="wallet-type_value"></span></p>
+    <p>Account Path: <span id="account-path_value"></span></p>
+    <p>Account Address: <span id="address_value"></span></p>
+    <p>Address Path: <span id="address-path_value"></span></p>
+    <p>Address Index: <span id="address-index_value"></span></p>
+</div>
+<script>
+    const client = new DashPayConnect.Client();
+    client.connect().then(()=>{
+        // alert('ready');
+        console.log('done')
+    })
+    document.getElementById('site-header__item-connect-wallet-button').onclick = async () => {
+        console.log('====== CONNECTED?');
+        document.getElementById('site-header__item-connect-wallet-button').classList.add('side-header__item-hidden');
+        document.getElementById('site-header__item-disconnect-wallet-button').classList.remove('side-header__item-hidden');
+        const {address, walletId, walletType, accountPath} = client.getAccount();
+        console.log({address, walletId});
+        document.getElementById('site-header__address').innerText = address.address;
+        document.getElementById('site-header__address').classList.remove('side-header__item-hidden');
+
+        document.getElementById('wallet-status_value').innerText = 'Connected';
+        document.getElementById('wallet-id_value').innerText = walletId;
+        document.getElementById('wallet-type_value').innerText = walletType;
+        document.getElementById('account-path_value').innerText = accountPath;
+
+        document.getElementById('address_value').innerText = address.address;
+        document.getElementById('address-path_value').innerText = address.path;
+        document.getElementById('address-index_value').innerText = address.index;
+    }
+    document.getElementById('site-header__item-disconnect-wallet-button').onclick = async () => {
+        await client.disconnect();
+        document.getElementById('site-header__item-connect-wallet-button').classList.remove('side-header__item-hidden');
+        document.getElementById('site-header__item-disconnect-wallet-button').classList.add('side-header__item-hidden');
+        document.getElementById('site-header__address').classList.add('side-header__item-hidden');
+    }
+</script>
+</body>
+</html>
