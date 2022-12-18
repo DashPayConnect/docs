@@ -1,6 +1,7 @@
 <html>
 <head>
-    <script src="./dashpay-connect.min.js"></script>
+    <script src="../../../js-library/dist/dashpay-connect.min.js"></script>
+    <script src="../../../platform/packages/js-dash-sdk/dist/dash.min.js"></script>
     <script>
         window.addEventListener("message", function (event) {
             if (event.data.type && (event.data.type == "FROM_CONTENT")) {
@@ -106,40 +107,89 @@
     <p>Wallet ID: <span id="wallet-id_value"></span></p>
     <p>Wallet Type: <span id="wallet-type_value"></span></p>
     <p>Account Path: <span id="account-path_value"></span></p>
+    <p>Account Index: <span id="account-index_value"></span></p>
     <p>Account Address: <span id="address_value"></span></p>
     <p>Address Path: <span id="address-path_value"></span></p>
     <p>Address Index: <span id="address-index_value"></span></p>
+
+
+    <h2>Last Block info</h2>
+    <p>Best Block Hash: <span id="best-block-hash_value"></span></p>
+    <p>Blocktime: <span id="best-block-time_value"></span></p>
+    <p>Transactions Nb: <span id="best-block-transactions-amount_value"></span></p>
+    <button id="refresh-l1-button">Refresh L1</button>
+    <button id="get-identity-button">Get Identity</button>
+    <button id="get-dpns-button">Get DPNS</button>
+    <button id="get-document-button">Get Documents</button>
 </div>
 <script>
-    const client = new DashPayConnect.Client();
-    client.connect().then(()=>{
-        // alert('ready');
-        console.log('done')
-    })
-    document.getElementById('site-header__item-connect-wallet-button').onclick = async () => {
-        console.log('====== CONNECTED?');
-        document.getElementById('site-header__item-connect-wallet-button').classList.add('side-header__item-hidden');
-        document.getElementById('site-header__item-disconnect-wallet-button').classList.remove('side-header__item-hidden');
-        const {address, walletId, walletType, accountPath} = client.getAccount();
-        console.log({address, walletId});
-        document.getElementById('site-header__address').innerText = address.address;
-        document.getElementById('site-header__address').classList.remove('side-header__item-hidden');
+    (function() {
+        const client = new DashPayConnect.Client();
+        client.connect().then(()=>{
+            // alert('ready');
+            console.log('done')
+        })
+        document.getElementById('site-header__item-connect-wallet-button').onclick = async () => {
+            console.log('====== CONNECTED?');
+            document.getElementById('site-header__item-connect-wallet-button').classList.add('side-header__item-hidden');
+            document.getElementById('site-header__item-disconnect-wallet-button').classList.remove('side-header__item-hidden');
+            const {address, walletId, accountIndex, walletType, accountPath} = client.getCurrentAccount();
+            console.log(client.getCurrentAccount().accountIndex, accountIndex);
+            console.log({address, walletId});
+            document.getElementById('site-header__address').innerText = address.address;
+            document.getElementById('site-header__address').classList.remove('side-header__item-hidden');
 
-        document.getElementById('wallet-status_value').innerText = 'Connected';
-        document.getElementById('wallet-id_value').innerText = walletId;
-        document.getElementById('wallet-type_value').innerText = walletType;
-        document.getElementById('account-path_value').innerText = accountPath;
+            document.getElementById('wallet-status_value').innerText = 'Connected';
+            document.getElementById('wallet-id_value').innerText = walletId;
+            document.getElementById('wallet-type_value').innerText = walletType;
+            document.getElementById('account-path_value').innerText = accountPath;
+            document.getElementById('account-index_value').innerText = accountIndex;
 
-        document.getElementById('address_value').innerText = address.address;
-        document.getElementById('address-path_value').innerText = address.path;
-        document.getElementById('address-index_value').innerText = address.index;
-    }
-    document.getElementById('site-header__item-disconnect-wallet-button').onclick = async () => {
-        await client.disconnect();
-        document.getElementById('site-header__item-connect-wallet-button').classList.remove('side-header__item-hidden');
-        document.getElementById('site-header__item-disconnect-wallet-button').classList.add('side-header__item-hidden');
-        document.getElementById('site-header__address').classList.add('side-header__item-hidden');
-    }
+            document.getElementById('address_value').innerText = address.address;
+            document.getElementById('address-path_value').innerText = address.path;
+            document.getElementById('address-index_value').innerText = address.index;
+        }
+        document.getElementById('site-header__item-disconnect-wallet-button').onclick = async () => {
+            await client.disconnect();
+            document.getElementById('site-header__item-connect-wallet-button').classList.remove('side-header__item-hidden');
+            document.getElementById('site-header__item-disconnect-wallet-button').classList.add('side-header__item-hidden');
+            document.getElementById('site-header__address').classList.add('side-header__item-hidden');
+        }
+        client.initDashInstance();
+        document.getElementById('get-identity-button').onclick = async () => {
+            const x = await client.dashInstance.platform.identities.get('6Jz8pFZFhssKSTacgQmZP14zGZNnFYZFKSbx4WVAJFy3');
+            console.log({x});
+            alert(JSON.stringify(x));
+        }
+        document.getElementById('get-dpns-button').onclick = async () => {
+            const x = await client.dashInstance.platform.names.resolve('alice.dash');
+            console.log({x});
+            alert(JSON.stringify(x));
+        }
+        document.getElementById('get-document-button').onclick = async () => {
+            client.dashInstance.apps.apps.dpns.contractId
+            const x = await client.dashInstance.platform.documents.get('dpns.record', {});
+            console.log({x});
+            alert(JSON.stringify(x));
+        }
+        const refreshL1ButtonElement = document.getElementById('refresh-l1-button');
+        refreshL1ButtonElement.onclick = ()=> { refreshL1(); }
+        const bestBlockHashElement = document.getElementById('best-block-hash_value');
+        const bestBlockTimeElement = document.getElementById('best-block-time_value');
+        const bestBlockTxAmountElement = document.getElementById('best-block-transactions-amount_value');
+        async function refreshL1(){
+            const dapiClient = client.dashInstance.platform.client.getDAPIClient();
+            const blockHash = await dapiClient.core.getBestBlockHash();
+            const bestBlock = Dash.Core.Block(await dapiClient.core.getBlockByHash(blockHash))
+            bestBlockHashElement.innerText = blockHash
+
+            bestBlockTimeElement.innerText = bestBlock.header.time;
+            bestBlockTxAmountElement.innerText = bestBlock.transactions.length;
+        }
+        refreshL1();
+
+    })();
+
 </script>
 </body>
 </html>
