@@ -1,0 +1,19 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "description": "Test it:",
+  "main": "index.js",
+  "scripts": {
+    "start": "docsify serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DashPayConnect/docs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DashPayConnect/docs/issues"
+  },
+  "homepage": "https://github.com/DashPayConnect/docs#readme"
+}

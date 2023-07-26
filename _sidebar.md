@@ -1,0 +1,24 @@
+- Getting started
+    - [Quick start](/README.md)
+- Storage
+    - [storages](storage/storages.md)
+    - [SubscribableStore](storage/SubscribableStore.md)
+- Usage
+    - Client
+        - [`new Client()`](usage/Client/Client.md)
+    - Extension
+      - Primitives
+        - ServiceWorkerPort
+          - [`new ServiceWorkerPort()`](usage/primitives/ServiceWorkerPort.md)
+        - StdMessage
+          - [`new StdMessage()`](usage/primitives/StdMessage.md)
+      - Worker Primitives
+        - MessageHandler
+          - [`new MessageHandler()`](usage/primitives/MessageHandler.md)
+        - DashManager
+          - [`new DashManager()`](usage/primitives/DashManager.md)
+        - SecureStorage
+          - [`new SecureStorage()`](usage/primitives/SecureStorage.md)
+        - WorkDispatcher
+            - [`new WorkDispatcher()`](usage/primitives/WorkDispatcher.md)
+- [License](https://github.com/DashPayConnect/docs/blob/master/LICENSE)
